@@ -1,0 +1,61 @@
+<html>
+<head>
+  <style>
+    .container {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    #chatBox {
+        border: 2px solid #dedede;
+        border-radius: 5px;
+    }
+  </style>
+</head>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<!--Start of X2Chat Script-->
+<script type="text/javascript">
+x2ChatSocket = new WebSocket('wss://npteh9z8i3.execute-api.us-west-2.amazonaws.com/Prod');
+console.log(x2ChatSocket);
+console.log(x2ChatSocket.readyState);
+(function(){
+    x2ChatSocket.onopen = function(event) {
+        console.log("Connected...");
+    };
+
+    x2ChatSocket.onmessage = function(event) {
+      $("#chatBox").append(`<div class='container'> ${event.data} </div>`);
+    };
+
+    x2ChatSocket.onclose = function(event) {
+        console.log(event);
+        alert('Connection Closed');
+    };
+
+    x2ChatSocket.onerror = function(event) {
+        console.log(event);
+    }
+
+})();
+</script>
+<!--End of X2Chat Script-->
+
+    <body>
+      <h2>Chat Bot</h2>
+      <div id="chatBox">test div</div>
+      <input id="chatInput" value="Type Something Here..."></input>
+      <button id="chatSend">Send</button>
+
+      <script type="text/javascript">
+          $('#chatSend').click(function() {
+              x2ChatSocket.send(JSON.stringify({"message":"sendmessage", "data":`${$('#chatInput').val()}`}));
+          });
+      </script>
+
+    </body>
+</html>
