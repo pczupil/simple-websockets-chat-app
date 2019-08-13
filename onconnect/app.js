@@ -10,6 +10,7 @@ exports.handler = function (event, context, callback) {
     TableName: process.env.TABLE_NAME,
     Item: {
       connectionId: { S: event.requestContext.connectionId }
+      connectTime: { Date() }
     }
   };
 
