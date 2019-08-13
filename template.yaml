@@ -15,6 +15,22 @@ Parameters:
     MaxLength: 50
     AllowedPattern: ^[A-Za-z_]+$
     ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
+  MessageTableName:
+    Type: String
+    Default: 'simplechat_messages'
+    Description: (Required) The name of the new DynamoDB to store message information for each connected clients. Minimum 3 characters
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: ^[A-Za-z_]+$
+    ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
+  ChannelTableName:
+    Type: String
+    Default: 'simplechat_channels'
+    Description: (Required) The name of the new DynamoDB to store channel information for each connected clients. Minimum 3 characters
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: ^[A-Za-z_]+$
+    ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
 
 Resources:
   SimpleChatWebSocket:
@@ -104,10 +120,6 @@ Resources:
       AttributeDefinitions:
       - AttributeName: "connectionId"
         AttributeType: "S"
-      - AttributeName: "connectTime"
-        AttributeType: "S"
-      - AttributeName: "channel"
-        AttributeType: "N"
       KeySchema:
       - AttributeName: "connectionId"
         KeyType: "HASH"
@@ -121,25 +133,32 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-      - AttributeName: "connectionId"
-        AttributeType: "S"
-      - AttributeName: "messageTime"
-        AttributeType: "S"
-      - AttributeName: "channel"
-        AttributeType: "N"
-      - AttributeName: "chatMessage"
-        AttributeType: "S"
       - AttributeName: "messageId"
-        AttributeType: "N"
+        AttributeType: "S"
       KeySchema:
-      - AttributeName: "connectionId"
+      - AttributeName: "messageId"
         KeyType: "HASH"
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
       SSESpecification:
         SSEEnabled: True
-      TableName: !Ref TableName
+      TableName: !Ref MessageTableName
+  ChannelsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: "channelId"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "channelId"
+        KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: True
+      TableName: !Ref ChannelTableName
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -217,6 +236,10 @@ Outputs:
   ConnectionsTableArn:
     Description: "Connections table ARN"
     Value: !GetAtt ConnectionsTable.Arn
+
+  MessagesTableArn:
+    Description: "Messages table ARN"
+    Value: !GetAtt MessagesTable.Arn
 
   OnConnectFunctionArn:
     Description: "OnConnect function ARN"
