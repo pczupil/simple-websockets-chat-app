@@ -7,7 +7,7 @@ const ddb = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
 const { TABLE_NAME } = process.env;
 
-exports.handler = async (event, context) => {
+exports.handler = async (event, context, callback) => {
   let connectionData;
   
   try {
