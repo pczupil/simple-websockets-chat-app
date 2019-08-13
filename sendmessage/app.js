@@ -22,10 +22,23 @@ exports.handler = async (event, context) => {
   });
   
   const postData = JSON.parse(event.body).data;
-  
+  var putParams = {
+    TableName: process.env.TABLE_NAME,
+    Item: {
+      connectionId: { S: event.requestContext.connectionId },
+      connectTime: { S: Date() },
+      chatMessage: { S: postData }
+    }
+  };
   const postCalls = connectionData.Items.map(async ({ connectionId }) => {
     try {
       await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: postData }).promise();
+      ddb.put(putParams, function (err) {
+        callback(null, {
+          statusCode: err ? 500 : 200,
+          body: err ? "Failed to send: " + JSON.stringify(err) : "Sent."
+        });
+      });
     } catch (e) {
       if (e.statusCode === 410) {
         console.log(`Found stale connection, deleting ${connectionId}`);

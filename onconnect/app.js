@@ -9,8 +9,8 @@ exports.handler = function (event, context, callback) {
   var putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
-      connectionId: { S: event.requestContext.connectionId }
-      connectTime: { Date() }
+      connectionId: { S: event.requestContext.connectionId },
+      connectTime: { S: Date() }
     }
   };
 
