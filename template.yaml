@@ -120,21 +120,21 @@ Resources:
   MessagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-    AttributeDefinitions:
-    - AttributeName: "connectionId"
-      AttributeType: "S"
-    - AttributeName: "messageTime"
-      AttributeType: "S"
-    - AttributeName: "channel"
-      AttributeType: "N"
-    - AttributeName: "chatMessage"
-      AttributeType: "S"
-    - AttributeName: "messageId"
-      AttributeType: "N"
-    KeySchema:
-    - AttributeName: "connectionId"
-      KeyType: "HASH"
-    ProvisionedThroughput:
+      AttributeDefinitions:
+      - AttributeName: "connectionId"
+        AttributeType: "S"
+      - AttributeName: "messageTime"
+        AttributeType: "S"
+      - AttributeName: "channel"
+        AttributeType: "N"
+      - AttributeName: "chatMessage"
+        AttributeType: "S"
+      - AttributeName: "messageId"
+        AttributeType: "N"
+      KeySchema:
+      - AttributeName: "connectionId"
+        KeyType: "HASH"
+      ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
       SSESpecification:
