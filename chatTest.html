@@ -21,11 +21,9 @@
 <!--Start of X2Chat Script-->
 <script type="text/javascript">
 x2ChatSocket = new WebSocket('wss://npteh9z8i3.execute-api.us-west-2.amazonaws.com/Prod');
-console.log(x2ChatSocket);
-console.log(x2ChatSocket.readyState);
 (function(){
     x2ChatSocket.onopen = function(event) {
-        console.log("Connected...");
+        console.log(event);
     };
 
     x2ChatSocket.onmessage = function(event) {

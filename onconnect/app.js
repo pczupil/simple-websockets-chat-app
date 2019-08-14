@@ -14,15 +14,33 @@ class ChannelManager {
     var getParams = {
       TableName: process.env.CHANNEL_TABLE_NAME
     };
-    return DDB.scan(getParams);
+    return DDB.scan(getParams, function(err, data) {
+      if (err) console.log(err, err.stack);
+      else  console.log(data);
+    });
+  }
+
+  getOpenChannel() {
+    var getParams = {
+      TableName: process.env.CHANNEL_TABLE_NAME,
+      FilterExpression: "open = true",
+      Limit: 1
+    };
+    return DDB.scan(getParams, function(err, data) {
+      if (err) console.log(err, err.stack);
+      else  console.log(data);
+    });
   }
 
   getOpenChannels() {
     var getParams = {
       TableName: process.env.CHANNEL_TABLE_NAME,
-      FilterExpression: "open = true",
+      FilterExpression: "open = true"
     };
-    return DDB.scan(getParams);
+    return DDB.scan(getParams, function(err, data) {
+      if (err) console.log(err, err.stack);
+      else console.log(data);
+    });
   }
 
   lockChannel(channelNum, callback) {
@@ -39,16 +57,16 @@ class ChannelManager {
       FilterExpression: "channelNum = :channelNum",
       UpdateExpression: "SET open = false, "
     };
-    var err = DDB.updateItem(putParams, function (err) {
-      callback(null, {
-        statusCode: err ? 500 : 200,
-        body: err ? "Failed to lock channel: " + JSON.stringify(err) : "Channel locked."
-      }
+    DDB.updateItem(putParams, function(err, data) {
+      if (err) console.log(err, err.stack);
+      else  console.log(data);
     });
   }
 }
 
 exports.handler = function (event, context, callback) {
+  var CM = new ChannelManager();
+  console.log("Fudge" + CM.channels);
   var putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
