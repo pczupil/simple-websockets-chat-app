@@ -169,6 +169,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          CHANNEL_TABLE_NAME: !Ref ChannelTableName
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref TableName
@@ -191,6 +192,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          CHANNEL_TABLE_NAME: !Ref ChannelTableName
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref TableName
@@ -213,6 +215,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          MESSAGE_TABLE_NAME: !Ref MessageTableName
+          CHANNEL_TABLE_NAME: !Ref ChannelTableName
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref TableName
@@ -240,6 +244,10 @@ Outputs:
   MessagesTableArn:
     Description: "Messages table ARN"
     Value: !GetAtt MessagesTable.Arn
+
+  ChannelsTableArn:
+    Description: "Channels table ARN"
+    Value: !GetAtt ChannelsTable.Arn
 
   OnConnectFunctionArn:
     Description: "OnConnect function ARN"
