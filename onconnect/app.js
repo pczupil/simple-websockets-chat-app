@@ -5,73 +5,16 @@ var AWS = require("aws-sdk");
 AWS.config.update({ region: process.env.AWS_REGION });
 var DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
-class ChannelManager {
-  constructor() {
-    this.channels = this.getChannels();
-  }
-
-  getChannels() {
-    var getParams = {
-      TableName: process.env.CHANNEL_TABLE_NAME
-    };
-    return DDB.scan(getParams, function(err, data) {
-      if (err) console.log(err, err.stack);
-      else  console.log(data);
-    });
-  }
-
-  getOpenChannel() {
-    var getParams = {
-      TableName: process.env.CHANNEL_TABLE_NAME,
-      FilterExpression: "open = true",
-      Limit: 1
-    };
-    return DDB.scan(getParams, function(err, data) {
-      if (err) console.log(err, err.stack);
-      else  console.log(data);
-    });
-  }
-
-  getOpenChannels() {
-    var getParams = {
-      TableName: process.env.CHANNEL_TABLE_NAME,
-      FilterExpression: "open = true"
-    };
-    return DDB.scan(getParams, function(err, data) {
-      if (err) console.log(err, err.stack);
-      else console.log(data);
-    });
-  }
-
-  lockChannel(channelNum, callback) {
-    var putParams = {
-      TableName: process.env.CHANNEL_TABLE_NAME,
-      Key: {
-        N: `${channelNum}`
-      },
-      ExpressionAttributeValues: {
-        ":channelNum": {
-          N: channelNum
-        }
-      },
-      FilterExpression: "channelNum = :channelNum",
-      UpdateExpression: "SET open = false, "
-    };
-    DDB.updateItem(putParams, function(err, data) {
-      if (err) console.log(err, err.stack);
-      else  console.log(data);
-    });
-  }
-}
+// We gon talk to Lex boy
+var lexruntime = new AWS.LexRuntime();
 
 exports.handler = function (event, context, callback) {
-  var CM = new ChannelManager();
-  console.log("Fudge" + CM.channels);
+
   var putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
       connectionId: { S: event.requestContext.connectionId },
-      connectTime: { S: Date() }
+      connectTime: { S: Date() },
     }
   };
 

@@ -5,6 +5,9 @@ const AWS = require('aws-sdk');
 
 const ddb = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
 
+// We gon talk to Lex boy
+var lexruntime = new AWS.LexRuntime();
+
 const { TABLE_NAME } = process.env;
 
 exports.handler = async (event, context, callback) => {
@@ -22,6 +25,7 @@ exports.handler = async (event, context, callback) => {
   });
   
   const postData = JSON.parse(event.body).data;
+  
   var putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
@@ -39,6 +43,25 @@ exports.handler = async (event, context, callback) => {
           body: err ? "Failed to send: " + JSON.stringify(err) : "Sent."
         });
       });
+      
+      var sessionAttrs = {};
+      var lexResp = '';
+      var lexParams = {
+        botAlias: '$LATEST', /* required */
+        botName: 'XTwoEngineChatBot', /* required */
+        userId: 'pczupil', /* required */
+        inputText: postData,
+        sessionAttributes: sessionAttrs
+      };
+  
+      await lexruntime.postText(lexParams, function(err, data) {
+        console.log("test log: \n" + JSON.stringify(err) + "\n" + JSON.stringify(data));
+        if (err) console.log(err, err.stack);
+        else     lexResp = data.message;
+      }).promise();
+    
+      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: lexResp }).promise();
+      
     } catch (e) {
       if (e.statusCode === 410) {
         console.log(`Found stale connection, deleting ${connectionId}`);
@@ -57,3 +80,4 @@ exports.handler = async (event, context, callback) => {
 
   return { statusCode: 200, body: 'Data sent.' };
 };
+
