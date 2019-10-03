@@ -25,18 +25,19 @@ exports.handler = async (event, context, callback) => {
   });
   
   const postData = JSON.parse(event.body).data;
-  
+  const message = postData.message;
+  console.log(message);
   var putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
       connectionId: { S: event.requestContext.connectionId },
       connectTime: { S: Date() },
-      chatMessage: { S: postData }
+      chatMessage: { S: message }
     }
   };
   const postCalls = connectionData.Items.map(async ({ connectionId }) => {
     try {
-      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: postData }).promise();
+      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: JSON.stringify(postData) }).promise();
       ddb.put(putParams, function (err) {
         callback(null, {
           statusCode: err ? 500 : 200,
@@ -44,23 +45,31 @@ exports.handler = async (event, context, callback) => {
         });
       });
       
-      var sessionAttrs = {};
-      var lexResp = '';
+      var sessionAttrs = {
+        'connectionId': connectionId
+      };
+      var lexResp = {};
       var lexParams = {
         botAlias: '$LATEST', /* required */
         botName: 'XTwoEngineChatBot', /* required */
         userId: 'pczupil', /* required */
-        inputText: postData,
+        inputText: postData.message,
         sessionAttributes: sessionAttrs
       };
-  
       await lexruntime.postText(lexParams, function(err, data) {
-        console.log("test log: \n" + JSON.stringify(err) + "\n" + JSON.stringify(data));
-        if (err) console.log(err, err.stack);
-        else     lexResp = data.message;
+        if (err) {
+          console.log(err, err.stack);
+        } else {
+          lexResp.message = data.message;
+          lexResp.fromLex = 1;
+          if (data.responseCard !== undefined) lexResp.respCard = data.responseCard;
+          console.log("Data from LEX:");
+          console.log(data);
+        }
       }).promise();
-    
-      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: lexResp }).promise();
+      console.log("Response from LEX:");
+      console.log(lexResp);
+      await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: JSON.stringify(lexResp) }).promise();
       
     } catch (e) {
       if (e.statusCode === 410) {
@@ -80,4 +89,3 @@ exports.handler = async (event, context, callback) => {
 
   return { statusCode: 200, body: 'Data sent.' };
 };
-
